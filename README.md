@@ -65,9 +65,10 @@
 如果有幫到你
 <p align="left">
 <p align="left">
-  <a href="https://p.ecpay.com.tw/B651285" target="_blank">
-    <img src="https://payment.ecpay.com.tw/Upload/QRCode/202504/QRCode_f581a638-4852-44ad-b863-b47aff0fa1aa.png" height="70"/>
-    <img src="https://www.ecpay.com.tw/Content/Themes/WebStyle20131201/images/header_logo.png" alt="ECPay" height="50" />
+  <a href="https://p.ecpay.com.tw/B651285">
+    <img src="https://payment.ecpay.com.tw/Upload/QRCode/202504/QRCode_f581a638-4852-44ad-b863-b47aff0fa1aa.png" width="70"/></a>
+   <a href="https://p.ecpay.com.tw/B651285">
+    <img src="https://www.ecpay.com.tw/Content/Themes/WebStyle20131201/images/header_logo.png" width="140"/></a>
   </a>
 </p>      
 
