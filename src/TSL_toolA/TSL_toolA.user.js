@@ -9,8 +9,8 @@
 // @run-at       document-end
 // @grant        none
 // @license      GPL-3.0
-// @updateURL    https://raw.githubusercontent.com/jjj9458/TampermonkeyUserscripts/main/src/TSL_toolA.user.js
-// @downloadURL  https://raw.githubusercontent.com/jjj9458/TampermonkeyUserscripts/main/src/TSL_toolA.user.js
+// @updateURL    https://raw.githubusercontent.com/jjj9458/TampermonkeyUserscripts/main/src/TSL_toolA/TSL_toolA.user.js
+// @downloadURL  https://raw.githubusercontent.com/jjj9458/TampermonkeyUserscripts/main/src/TSL_toolA/TSL_toolA.user.js
 // @homepageURL  https://github.com/jjj9458/TampermonkeyUserscripts
 // @supportURL   https://github.com/jjj9458/TampermonkeyUserscripts/issues
 // ==/UserScript==
