@@ -15,6 +15,9 @@
 // @supportURL   https://github.com/jjj9458/TampermonkeyUserscripts/issues
 // ==/UserScript==
 
+/*
+ * 註解版
+ **/
 
 (function(){
     'use strict';
