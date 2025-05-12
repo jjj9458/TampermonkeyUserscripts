@@ -2,7 +2,7 @@
 // @name         Taiwan SportsLottery 綜合腳本
 // @namespace    https://github.com/jjj9458
 // @version      1.0
-// @description  v1.0：MyBets 自動計算 + 隱藏功能
+// @description  功能說明與紀錄 https://github.com/jjj9458/TampermonkeyUserscripts/blob/main/src/TSL_toolA/Changelog.md
 // @author       jjj9458
 // @match        https://member.sportslottery.com.tw/*
 // @match        https://www-talo-ssb-pr.sportslottery.com.tw/*
