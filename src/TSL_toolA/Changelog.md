@@ -45,9 +45,15 @@
 
 * **按鈕遲遲不出現？**
 
-  1. 確認網址為 `/account/my-bets`。
-  2. 等待 1～2 秒，腳本會每 300ms 嘗試注入一次。
-  3. 若仍不見，檢查 Tampermonkey 腳本是否正確載入並啟用。
+  1. chrome/Edge 用戶 基於瀏覽器限制需要先開啟[設定(Q209)](https://www.tampermonkey.net/faq.php#Q209)  
+      <details>
+     <summary>範例圖片</summary>
+     
+       ![image](https://github.com/user-attachments/assets/12e60fd8-6cef-41bb-95e0-edf84d7bccc0)
+     </details>
+  2. 確認網址為 `/account/my-bets`。
+  3. 等待 1～2 秒，腳本會每 300ms 嘗試注入一次。
+  4. 若仍不見，檢查 Tampermonkey 腳本是否正確載入並啟用。
 
 * **計算結果不正確？**
 
@@ -62,8 +68,9 @@
 
 * **投注紀錄時間卡住？**
 
-  1. 如果投注紀錄時間與設定日期區間不同
-  2. 建議先切換入「未派彩」，再回到「已派彩」
+  1. 如果投注紀錄時間與設定日期區間不同  
+  2. 建議先切換入「未派彩」，再回到「已派彩」  
+
 
 ---
 
