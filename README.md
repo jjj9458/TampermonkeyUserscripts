@@ -1,6 +1,6 @@
 # TampermonkeyUserscripts
 
-這邊整理過去編寫的 [Tampermonkey](https://www.tampermonkey.net/) 使用者腳本(Userscript)  
+這邊陸續整理過去編寫的 [Tampermonkey](https://www.tampermonkey.net/) 使用者腳本(Userscript)  
 也有寫到一半忘記當初要幹嘛  
 或是一些網路上發現好玩功能的腳本  
 
@@ -63,7 +63,6 @@
 
 ## 贊助支持：
 如果有幫到你
-<p align="left">
 <p align="left">
   <a href="https://p.ecpay.com.tw/B651285">
     <img src="https://payment.ecpay.com.tw/Upload/QRCode/202504/QRCode_f581a638-4852-44ad-b863-b47aff0fa1aa.png" width="70"/></a>
