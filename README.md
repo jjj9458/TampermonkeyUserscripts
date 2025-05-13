@@ -33,11 +33,13 @@
       <td>
         <a href="https://raw.githubusercontent.com/jjj9458/TampermonkeyUserscripts/main/src/TSL_toolA/TSL_toolA.user.js"><img src="https://www.reshot.com/preview-assets/icons/YZ2MBN3G6V/download-from-the-cloud-YZ2MBN3G6V.svg" width="32"/></a>
       </td>
-      <td>MyBets 自動計算 + 隱藏功能</td>
+      <td>MyBets 自動計算+維持登入</td>
       <td>
       <a href="https://github.com/jjj9458/TampermonkeyUserscripts/blob/main/src/TSL_toolA/Changelog.md">說明書</a><br>
         <ol>
           <li>生成按鈕，自動展開紀錄，並進行總計</li>
+          <li>維持登入狀態並在到期前提醒</li>
+        </ol>
       </td>
     </tr>
     <tr>
