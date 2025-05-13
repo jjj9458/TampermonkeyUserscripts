@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         Taiwan SportsLottery 綜合腳本
-// @namespace    https://github.com/jjj9458
+// @namespace    https://github.com/jjj9458/
 // @version      1.0
-// @description  功能說明與紀錄 https://github.com/jjj9458/TampermonkeyUserscripts/blob/main/src/TSL_toolA/Changelog.md
-// @author       jjj9458
+// @description  MyBets 自動計算 + 維持登入及超時提醒
+// @author       haley80208@PTT
 // @match        https://member.sportslottery.com.tw/*
 // @match        https://www-talo-ssb-pr.sportslottery.com.tw/*
 // @run-at       document-end
@@ -14,4 +14,235 @@
 // @homepageURL  https://github.com/jjj9458/TampermonkeyUserscripts
 // @supportURL   https://github.com/jjj9458/TampermonkeyUserscripts/issues
 // ==/UserScript==
-(function(){'use strict';(function(){const e=t=>function(){const n=t.apply(this,arguments);return window.dispatchEvent(new Event('locationchange')),n};history.pushState=e(history.pushState),history.replaceState=e(history.replaceState),window.addEventListener('popstate',()=>window.dispatchEvent(new Event('locationchange')));})();if(location.host==='member.sportslottery.com.tw'){let e=null,t=parseInt(localStorage.getItem('KeepAliveStartTs'),10)||null,n=!1;const o=3.5*3600*1e3,r=window.fetch;window.fetch=function(i,a){if(typeof i==='string'&&i.includes('/session-manager/v2/session/heartBeat'))try{const s=a&&a.body,c=s&&JSON.parse(s).sessionToken,l=e&&JSON.parse(e.body).sessionToken;(!e||c!==l)&&(e=a,t=Date.now(),localStorage.setItem('KeepAliveStartTs',t),n=!1);else e=a}catch{}return r(i,a)};async function i(){if(!e)return;try{const t=await r('https://member.sportslottery.com.tw/session-manager/v2/session/heartBeat',e);await t.json()}catch{}}window.sendHeartbeat=i;!function s(){const e=240000,t=Math.floor(Math.random()*31),n=1e3*t,o=t%2===0?e+n:e-n;setTimeout(async()=>{await i(),s()},o)}(),setInterval(()=>{t&&!n&&Date.now()-t>=o&&(n=!0,alert('⚠️ Session 已超過 3.5 小時，請重新登入！'))},6e4)}function a(){const e=location.host;if(!((e==='member.sportslottery.com.tw'&&location.pathname.startsWith('/account/my-bets'))||e==='www-talo-ssb-pr.sportslottery.com.tw'))return;const t=window.top===window.self;function n(){if(document.querySelector('#myCalcButton'))return;const e=document.querySelector('.styled__BreadcrumbsInfo-sc-1ipvy8g-6');if(!e)return;e.style.display='flex',e.style.justifyContent='space-between',e.style.gap='1rem';const t=document.createElement('div');t.style.display='inline-flex',t.style.alignItems='center',t.style.gap='0.5rem';const n=document.createElement('span');n.textContent='先到已派彩，設定日期區間，再按';const o=document.createElement('button');o.id='myCalcButton',o.textContent='計算';const r=document.createElement('span');r.id='myCalcText',t.append(n,o,r),e.appendChild(t);let i=0,a=0,s=0;window.addEventListener('message',e=>{e.origin==='https://www-talo-ssb-pr.sportslottery.com.tw'&&e.data?.type==='BET_RESULTS'&&(a+=e.data.totalStake,s+=e.data.totalReturn,i--,i===0&&(r.textContent=`共花費：${a}，共中獎：${s}，淨利：${s-a}`,o.disabled=!1))}),o.addEventListener('click',()=>{r.textContent='計算中...',o.disabled=!0,a=0,s=0;const e=Array.from(document.querySelectorAll('iframe[src*="talo-ssb-pr"]'));if(i=e.length,i===0)return r.textContent='找不到 iframe',o.disabled=!1,void 0;e.forEach(t=>t.contentWindow.postMessage({type:'START_CALC'},'https://www-talo-ssb-pr.sportslottery.com.tw'))})}function o(){const e=setInterval(()=>{n(),document.querySelector('#myCalcButton')&&clearInterval(e)},300)}function r(){window.addEventListener('message',e=>{if(e.origin==='https://member.sportslottery.com.tw'&&e.data?.type==='START_CALC'){let t=0,n=document,o=setInterval(()=>{let r=n.querySelector('.MyBetsstyled__LoadMoreButton-sc-nwucds-1')||Array.from(n.querySelectorAll('button')).find(e=>/載入更多|更多|Load\s?More/i.test(e.innerText));if(r)r.click(),t=0;else if(++t>=3){clearInterval(o);let t=0,r=0;n.querySelectorAll('[data-test-id="amount-mybets-mgs-totalstake"]').forEach(e=>{const n=e.closest('[title]')?.title||e.innerText;t+=parseFloat(n.replace(/[^\d\.-]/g,''))||0}),n.querySelectorAll('[data-test-id="amount-mybets-mgs-potentialreturn"]').forEach(e=>{const n=e.closest('[title]')?.title||e.innerText;r+=parseFloat(n.replace(/[^\d\.-]/g,''))||0}),window.parent.postMessage({type:'BET_RESULTS',totalStake:t,totalReturn:r},'https://member.sportslottery.com.tw')}})},500)}}t?o():r()}window.addEventListener('load',a),window.addEventListener('locationchange',a)})();
+
+(function(){
+    'use strict';
+
+    (function(){
+        const wrap = fn=>function(){
+            const ret=fn.apply(this,arguments);
+            window.dispatchEvent(new Event('locationchange'));
+            return ret;
+        };
+        history.pushState=wrap(history.pushState);
+        history.replaceState=wrap(history.replaceState);
+        window.addEventListener('popstate',()=>window.dispatchEvent(new Event('locationchange')));
+    })();
+
+    function showExpiryBanner(){
+        if(document.getElementById('session-expiry-banner'))return;
+        const banner=document.createElement('div');
+        banner.id='session-expiry-banner';
+        banner.innerHTML=`
+            ⚠️ <strong>您的 Session 已使用超過 3.5 小時</strong> ，
+            為避免被強制登出，建議立即重新登入
+            <button id="close-session-expiry" style="
+                margin-left:1rem;
+                background:transparent;
+                border:none;
+                color:#fff;
+                font-size:1.2rem;
+                cursor:pointer;
+            ">✕</button>
+        `;
+        Object.assign(banner.style,{
+            position:'fixed',
+            top:'0',
+            left:'0',
+            width:'100%',
+            padding:'1rem',
+            backgroundColor:'#ff4d4f',
+            color:'#fff',
+            fontSize:'1rem',
+            textAlign:'center',
+            zIndex:'9999',
+            boxShadow:'0 2px 5px rgba(0,0,0,0.3)'
+        });
+        document.body.appendChild(banner);
+        document.getElementById('close-session-expiry').addEventListener('click',()=>banner.remove());
+    }
+
+    if(location.host==='member.sportslottery.com.tw'){
+        let latestInit=null;
+        let startTs=parseInt(localStorage.getItem('KeepAliveStartTs'),10)||null;
+        let notified=false;
+        const MAX_DURATION_MS=3.5*3600*1000;
+        const _origFetch=window.fetch;
+        window.fetch=function(input,init){
+            if(typeof input==='string'&&input.includes('/session-manager/v2/session/heartBeat')){
+                try{
+                    const bodyText=init&&init.body;
+                    const tokenNow=bodyText&&JSON.parse(bodyText).sessionToken;
+                    const tokenPrev=latestInit&&JSON.parse(latestInit.body).sessionToken;
+                    if(!latestInit||tokenNow!==tokenPrev){
+                        latestInit=init;
+                        startTs=Date.now();
+                        localStorage.setItem('KeepAliveStartTs',startTs);
+                        notified=false;
+                    }else{
+                        latestInit=init;
+                    }
+                }catch{}
+            }
+            return _origFetch(input,init);
+        };
+
+        async function sendHeartbeat(){
+            if(!latestInit)return;
+            try{
+                const res=await _origFetch(
+                    'https://member.sportslottery.com.tw/session-manager/v2/session/heartBeat',
+                    latestInit
+                );
+                const data=await res.json();
+                if(!(res.ok&&data.sessionActive)){}
+            }catch{}
+        }
+        window.sendHeartbeat=sendHeartbeat;
+
+        function scheduleHeartbeat(){
+            const baseMs=4*60*1000;
+            const randSec=Math.floor(Math.random()*31);
+            const varMs=randSec*1000;
+            const interval=(randSec%2===0)?baseMs+varMs:baseMs-varMs;
+            setTimeout(async()=>{
+                await sendHeartbeat();
+                scheduleHeartbeat();
+            },interval);
+        }
+        scheduleHeartbeat();
+
+        setInterval(()=>{
+            if(startTs&&!notified&&Date.now()-startTs>=MAX_DURATION_MS){
+                notified=true;
+                showExpiryBanner();
+            }
+        },60*1000);
+
+        let prevPath=location.pathname;
+        window.addEventListener('locationchange',()=>{
+            const newPath=location.pathname;
+            if(prevPath==='/login'&&newPath!=='/login'){
+                startTs=Date.now();
+                localStorage.setItem('KeepAliveStartTs',startTs);
+                notified=false;
+            }
+            prevPath=newPath;
+        });
+    }
+
+    function runMyBets(){
+        const h=location.host;
+        if(!((h==='member.sportslottery.com.tw'&&location.pathname.startsWith('/account/my-bets'))||
+             h==='www-talo-ssb-pr.sportslottery.com.tw'))return;
+        const isTop=window.top===window.self;
+
+        function injectButton(){
+            if(document.querySelector('#myCalcButton'))return;
+            const bcInfo=document.querySelector('.styled__BreadcrumbsInfo-sc-1ipvy8g-6');
+            if(!bcInfo)return;
+            bcInfo.style.display='flex';
+            bcInfo.style.justifyContent='space-between';
+            bcInfo.style.gap='1rem';
+
+            const ctrl=document.createElement('div');
+            ctrl.style.display='inline-flex';
+            ctrl.style.alignItems='center';
+            ctrl.style.gap='0.5rem';
+            const txt=document.createElement('span');
+            txt.textContent='先到已派彩，設定日期區間，再按';
+            const btn=document.createElement('button');
+            btn.id='myCalcButton';
+            btn.textContent='計算';
+            const out=document.createElement('span');
+            out.id='myCalcText';
+            ctrl.append(txt,btn,out);
+            bcInfo.appendChild(ctrl);
+
+            let pending=0,sumS=0,sumR=0;
+            window.addEventListener('message',e=>{
+                if(e.origin==='https://www-talo-ssb-pr.sportslottery.com.tw'&&e.data?.type==='BET_RESULTS'){
+                    sumS+=e.data.totalStake;
+                    sumR+=e.data.totalReturn;
+                    pending--;
+                    if(pending===0){
+                        out.textContent=`共花費：${sumS}，共中獎：${sumR}，淨利：${sumR-sumS}`;
+                        btn.disabled=false;
+                    }
+                }
+            });
+            btn.addEventListener('click',()=>{
+                out.textContent='計算中...';
+                btn.disabled=true;
+                sumS=0;sumR=0;
+                const iframes=Array.from(document.querySelectorAll('iframe[src*="talo-ssb-pr"]'));
+                pending=iframes.length;
+                if(pending===0){
+                    out.textContent='找不到 iframe';
+                    btn.disabled=false;
+                    return;
+                }
+                iframes.forEach(f=>f.contentWindow.postMessage(
+                    {type:'START_CALC'},
+                    'https://www-talo-ssb-pr.sportslottery.com.tw'
+                ));
+            });
+        }
+
+        function initTop(){
+            const iv=setInterval(()=>{
+                injectButton();
+                if(document.querySelector('#myCalcButton'))clearInterval(iv);
+            },300);
+        }
+
+        function initIframe(){
+            window.addEventListener('message',e=>{
+                if(e.origin==='https://member.sportslottery.com.tw'&&e.data?.type==='START_CALC'){
+                    let nf=0;
+                    const d=window.document;
+                    const ci=setInterval(()=>{
+                        let b=d.querySelector('.MyBetsstyled__LoadMoreButton-sc-nwucds-1')||
+                              Array.from(d.querySelectorAll('button'))
+                                   .find(x=>/載入更多|更多|Load\s?More/i.test(x.innerText));
+                        if(b){b.click();nf=0;}
+                        else{
+                            nf++;
+                            if(nf>=3){
+                                clearInterval(ci);
+                                let tS=0,tR=0;
+                                d.querySelectorAll('[data-test-id="amount-mybets-mgs-totalstake"]')
+                                 .forEach(s=>{
+                                     const r=s.closest('[title]')?.title||s.innerText;
+                                     tS+=parseFloat(r.replace(/[^\d\.-]/g,''))||0;
+                                 });
+                                d.querySelectorAll('[data-test-id="amount-mybets-mgs-potentialreturn"]')
+                                 .forEach(s=>{
+                                     const r=s.closest('[title]')?.title||s.innerText;
+                                     tR+=parseFloat(r.replace(/[^\d\.-]/g,''))||0;
+                                 });
+                                window.parent.postMessage(
+                                    {type:'BET_RESULTS',totalStake:tS,totalReturn:tR},
+                                    'https://member.sportslottery.com.tw'
+                                );
+                            }
+                        }
+                    },500);
+                }
+            });
+        }
+
+        if(isTop)initTop();else initIframe();
+    }
+
+    window.addEventListener('load',runMyBets);
+    window.addEventListener('locationchange',runMyBets);
+
+})();
+
+/*
+ * 匯集過去PTT@SportLottery各位前輩們分享過的架構
+ * 與鄉民們的使用回饋，就不一一提及
+ * 僅供未來接棒者了解並繼續傳承
+ * 祝各位繼續順利尻剛
+ **/
