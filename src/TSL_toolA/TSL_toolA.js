@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         Taiwan SportsLottery 綜合腳本
-// @namespace    https://github.com/jjj9458/test
+// @namespace    https://github.com/jjj9458/
 // @version      1.0
-// @description  v1.0：MyBets 自動計算 + 維持登入及超時提醒
-// @author       jjj9458
+// @description  MyBets 自動計算 + 維持登入及超時提醒
+// @author       haley80208@PTT
 // @match        https://member.sportslottery.com.tw/*
 // @match        https://www-talo-ssb-pr.sportslottery.com.tw/*
 // @run-at       document-end
@@ -16,8 +16,8 @@
 
 /*
  * 註解版
- * // @updateURL    https://raw.githubusercontent.com/jjj9458/TampermonkeyUserscripts/main/src/TSL_toolA.user.js
- * // @downloadURL  https://raw.githubusercontent.com/jjj9458/TampermonkeyUserscripts/main/src/TSL_toolA.user.js
+ * // @updateURL    https://raw.githubusercontent.com/jjj9458/TampermonkeyUserscripts/main/src/TSL_toolA/TSL_toolA.user.js
+ * // @downloadURL  https://raw.githubusercontent.com/jjj9458/TampermonkeyUserscripts/main/src/TSL_toolA/TSL_toolA.user.js
  **/
 
 (function(){
