@@ -67,7 +67,7 @@
         const banner = document.createElement('div');
         banner.id = 'session-expiry-banner';
         banner.innerHTML = `
-            ⚠️ <strong>您的 Session 已使用超過 3.5 小時</strong> ，
+            ⚠️ <strong>您已使用超過 3.5 小時</strong> ，
             為避免被強制登出，建議立即重新登入
             <button id="close-session-expiry" style="
                 margin-left:1rem;
