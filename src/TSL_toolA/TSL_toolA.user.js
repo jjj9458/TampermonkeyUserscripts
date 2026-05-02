@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Taiwan SportsLottery 綜合腳本
 // @namespace    https://github.com/jjj9458/
-// @version      1.0
+// @version      1.1
 // @description  MyBets 自動計算 + 維持登入及超時提醒
 // @author       haley80208@PTT
 // @match        https://member.sportslottery.com.tw/*
