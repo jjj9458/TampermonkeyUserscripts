@@ -29,8 +29,11 @@
         window.addEventListener('popstate', ()=> window.dispatchEvent(new Event('locationchange')));
     })();
 
+    /*更新說明：公共電腦提醒橫幅改到底部，出現 2 秒後自動關閉，保留手動關閉*/
     function showPublicWarning() {
-        if (document.getElementById('public-warning-banner')) return;
+        const old = document.getElementById('public-warning-banner');
+        if (old) old.remove();
+
         const banner = document.createElement('div');
         banner.id = 'public-warning-banner';
         banner.innerHTML = `
@@ -44,43 +47,56 @@
             cursor:pointer;
         ">✕</button>
     `;
-        Object.assign(banner.style, {
-            position: 'fixed',
-            top: '6rem',
-            left: '0',
-            width: '100%',
-            padding: '1rem',
-            backgroundColor: '#faad14',
-            color: '#fff',
-            fontSize: '1rem',
-            textAlign: 'center',
-            zIndex: '10000',
-            boxShadow: '0 2px 5px rgba(0,0,0,0.3)'
-        });
-        document.body.appendChild(banner);
-        document.getElementById('close-public-warning')
-            .addEventListener('click', () => banner.remove());
-    }
 
+    Object.assign(banner.style, {
+        position: 'fixed',
+        bottom: '0',
+        left: '0',
+        width: '100%',
+        padding: '1rem',
+        backgroundColor: '#faad14',
+        color: '#fff',
+        fontSize: '1rem',
+        textAlign: 'center',
+        zIndex: '10000',
+        boxShadow: '0 -2px 5px rgba(0,0,0,0.3)'
+    });
+
+    document.body.appendChild(banner);
+
+    const closeBanner = () => {
+        if (banner && banner.parentNode) banner.remove();
+    };
+
+    document.getElementById('close-public-warning')
+        .addEventListener('click', closeBanner);
+
+    setTimeout(closeBanner, 2000);
+}
+
+    /*更新說明：提醒橫幅改到底部，出現 2 秒後自動關閉，仍保留手動關閉*/
     function showExpiryBanner(){
-        if (document.getElementById('session-expiry-banner')) return;
+        const old = document.getElementById('session-expiry-banner');
+        if (old) old.remove();
+
         const banner = document.createElement('div');
         banner.id = 'session-expiry-banner';
         banner.innerHTML = `
-            ⚠️ <strong>您已使用超過 3.5 小時</strong> ，
-            為避免被強制登出，建議立即重新登入
-            <button id="close-session-expiry" style="
-                margin-left:1rem;
-                background:transparent;
-                border:none;
-                color:#fff;
-                font-size:1.2rem;
-                cursor:pointer;
-            ">✕</button>
-        `;
+        ⚠️ <strong>您已使用超過 3.5 小時</strong> ，
+        為避免被強制登出，建議立即重新登入
+        <button id="close-session-expiry" style="
+            margin-left:1rem;
+            background:transparent;
+            border:none;
+            color:#fff;
+            font-size:1.2rem;
+            cursor:pointer;
+        ">✕</button>
+    `;
+
         Object.assign(banner.style, {
             position: 'fixed',
-            top: '0',
+            bottom: '0',
             left: '0',
             width: '100%',
             padding: '1rem',
@@ -89,37 +105,58 @@
             fontSize: '1rem',
             textAlign: 'center',
             zIndex: '9999',
-            boxShadow: '0 2px 5px rgba(0,0,0,0.3)'
+            boxShadow: '0 -2px 5px rgba(0,0,0,0.3)'
         });
+
         document.body.appendChild(banner);
+
+        const closeBanner = () => {
+            if (banner && banner.parentNode) banner.remove();
+        };
+
         document.getElementById('close-session-expiry')
-            .addEventListener('click', ()=> banner.remove());
+            .addEventListener('click', closeBanner);
+
+        setTimeout(closeBanner, 2000);
     }
 
     if (location.host === 'member.sportslottery.com.tw') {
+        /*更新說明：避免重新開網頁後沿用舊登入時間造成誤提醒*/
         let latestInit = null;
-        let startTs = parseInt(localStorage.getItem('KeepAliveStartTs'),10) || null;
-        let notified = false;
+        let startTs = null;
+        let notified = localStorage.getItem('KeepAliveExpiryNotified') === '1';
+
         const MAX_DURATION_MS = 3.5 * 3600 * 1000;
+        const START_TS_KEY = 'KeepAliveStartTs';
+        const TOKEN_KEY = 'KeepAliveSessionToken';
+        const NOTIFIED_KEY = 'KeepAliveExpiryNotified';
 
         const _origFetch = window.fetch;
+        /*更新說明：只有抓到目前 sessionToken 後才開始計時，避免重新開頁沿用舊時間*/
         window.fetch = function(input, init){
             if (typeof input === 'string' &&
                 input.includes('/session-manager/v2/session/heartBeat')) {
                 try {
                     const bodyText = init && init.body;
                     const tokenNow = bodyText && JSON.parse(bodyText).sessionToken;
-                    const tokenPrev = latestInit && JSON.parse(latestInit.body).sessionToken;
-                    if (!latestInit || tokenNow !== tokenPrev) {
+                    const tokenPrev = localStorage.getItem(TOKEN_KEY);
+
+                    if (tokenNow) {
                         latestInit = init;
-                        startTs = Date.now();
-                        localStorage.setItem('KeepAliveStartTs', startTs);
-                        notified = false;
-                    } else {
-                        latestInit = init;
+
+                        if (tokenNow !== tokenPrev) {
+                            startTs = Date.now();
+                            localStorage.setItem(START_TS_KEY, String(startTs));
+                            localStorage.setItem(TOKEN_KEY, tokenNow);
+                            localStorage.removeItem(NOTIFIED_KEY);
+                            notified = false;
+                        } else {
+                            startTs = parseInt(localStorage.getItem(START_TS_KEY), 10) || Date.now();
+                        }
                     }
                 } catch(e){}
             }
+
             return _origFetch(input, init);
         };
 
@@ -147,22 +184,37 @@
         }
         scheduleHeartbeat();
 
+        /*更新說明：同一個 session 只提醒一次，重新開頁不重複跳*/
         setInterval(()=>{
             if (startTs && !notified && Date.now() - startTs >= MAX_DURATION_MS) {
                 notified = true;
+                localStorage.setItem(NOTIFIED_KEY, '1');
                 showExpiryBanner();
             }
         }, 60 * 1000);
 
         let prevPath = location.pathname;
+        /*更新說明：進入登入頁時清掉舊登入狀態，避免手動登出後殘留提醒*/
         window.addEventListener('locationchange', ()=>{
             const newPath = location.pathname;
+
+            if (newPath === '/login') {
+                startTs = null;
+                notified = false;
+                latestInit = null;
+                localStorage.removeItem(START_TS_KEY);
+                localStorage.removeItem(TOKEN_KEY);
+                localStorage.removeItem(NOTIFIED_KEY);
+            }
+
             if (prevPath === '/login' && newPath !== '/login') {
                 startTs = Date.now();
-                localStorage.setItem('KeepAliveStartTs', startTs);
+                localStorage.setItem(START_TS_KEY, String(startTs));
+                localStorage.removeItem(NOTIFIED_KEY);
                 notified = false;
                 showPublicWarning();
             }
+
             prevPath = newPath;
         });
     }
